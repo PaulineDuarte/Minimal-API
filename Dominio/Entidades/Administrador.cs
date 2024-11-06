@@ -16,9 +16,11 @@ public class Administrador
     [StringLength(255)]
     public string Email { get; set; }
 
+    [Required]
     [StringLength(50)]
     public string Senha { get; set; }
 
+    [Required]
     [StringLength(10)]
     public string Perfil { get; set; }
 }
