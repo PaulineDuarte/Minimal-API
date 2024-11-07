@@ -1,5 +1,4 @@
 
-
 namespace MinimalAPI.Dominio.ModelsViews; 
 
 

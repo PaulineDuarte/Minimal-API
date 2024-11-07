@@ -28,6 +28,10 @@ var app = builder.Build();
 
 #region Home
 app.MapGet("/", () => Results.Json(new Home())).WithTags("Home");
+
+
+
+
 #endregion 
 
 
@@ -65,7 +69,7 @@ app.MapGet("/veiculos",([FromQuery] int pagina, IVeiculoServico veiculoServico)=
 }).WithTags("Veiculos");
 
 // retornar um veiculo
-app.MapGet("/veiculos/{Id}",([FromRoute] int Id, IVeiculoServico veiculoServico)=> 
+app.MapGet("/veiculos/{id}",([FromRoute] int Id, IVeiculoServico veiculoServico)=> 
 {    
             var veiculo = veiculoServico.BuscaPorId(Id);
             if (veiculo == null) 
@@ -74,11 +78,42 @@ app.MapGet("/veiculos/{Id}",([FromRoute] int Id, IVeiculoServico veiculoServico)
             return Results.Ok(veiculo); 
 }).WithTags("Veiculos");
 
+// PUT para atualizar veiculo
+app.MapPut("/veiculos/{id}",([FromRoute] int Id, VeiculoDTO veiculoDTO, IVeiculoServico veiculoServico)=> 
+{    
+        var veiculo = veiculoServico.BuscaPorId(Id);
+        if (veiculo == null) return Results.NotFound();
+        
+        veiculo.Nome = veiculoDTO.Nome;
+        veiculo.Marca = veiculoDTO.Marca;
+        veiculo.Ano = veiculoDTO.Ano;
+
+        veiculoServico.Atualizar(veiculo);
+
+        return Results.Ok(veiculo); 
+
+}).WithTags("Veiculos");
+
+app.MapDelete("/veiculos/{Id}",([FromRoute] int Id, IVeiculoServico veiculoServico)=> 
+{    
+        var veiculo = veiculoServico.BuscaPorId(Id);
+        if (veiculo == null) return Results.NotFound();
+
+        veiculoServico.Apagar(veiculo);
+        return Results.NoContent(); 
+
+}).WithTags("Veiculos");
+
+
 #endregion
 
 #region App
 app.UseSwagger();
-app.UseSwaggerUI(); 
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Minha API v1");
+    c.RoutePrefix = string.Empty; // Configura Swagger para a rota raiz se desejar
+}); 
 
 app.Run();
 #endregion
