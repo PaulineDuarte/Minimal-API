@@ -57,8 +57,7 @@ app.MapPost("/veiculos",([FromBody] VeiculoDTO veiculoDTO, IVeiculoServico veicu
 });
 
 app.MapGet("/veiculos",([FromQuery] int pagina, IVeiculoServico veiculoServico)=> 
-{       //nova instancia de veiculos
-            
+{    
             var veiculos = veiculoServico.Todos(pagina);
             
             return Results.Ok(veiculos); 
