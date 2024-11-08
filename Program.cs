@@ -43,7 +43,59 @@ app.MapPost("/administradores/login",([FromBody] LoginDTO loginDTO, IAdministrad
             return Results.Ok("Login com sucesso");
         else 
             return Results.Unauthorized();
-}).WithTags("Administrador");
+}).WithTags("Administradores");
+
+
+app.MapGet("/administradores",([FromQuery] int pagina, IAdministradorServico administradorServico)=> 
+{
+        return Results.Ok(administradorServico.Todos(pagina));
+        
+}).WithTags("Administradores");
+
+
+app.MapGet("/administrador/{id}",([FromRoute] int Id, IAdministradorServico administradorServico)=> 
+{    
+            var administrador = administradorServico.BuscaPorId(Id);
+            if (administrador == null) 
+                return Results.NotFound();
+            
+            return Results.Ok(administrador); 
+}).WithTags("Administradores");
+
+
+
+
+app.MapPost("/administradores",([FromBody] AdministradorDTO administradorDTO, IAdministradorServico administradorServico)=> 
+{     
+    var validacao = new ErrosValidacao 
+     {
+        Mensagens= new List<string>()
+     };
+
+     if (string.IsNullOrEmpty(administradorDTO.Email))
+        validacao.Mensagens.Add("Email não pode ser vazio");
+
+    if (string.IsNullOrEmpty(administradorDTO.Senha))
+        validacao.Mensagens.Add("Senha não pode ser vazia");
+
+    
+    if (string.IsNullOrEmpty(administradorDTO.Email))
+        validacao.Mensagens.Add("Perfil não pode ser vazio");
+    
+    if (validacao.Mensagens.Count>0)
+        return Results.BadRequest(validacao);
+
+
+    	var administrador = new Administrador
+        {
+            Email = administradorDTO.Email,
+            Senha = administradorDTO.Senha,
+            Perfil = administradorDTO.Perfil.ToString()
+        };
+        administradorServico.Incluir(administrador);
+        return Results.Created($"/administrador/",administrador); 
+    	
+}).WithTags("Administradores");
 #endregion
 
 #region Veiculos 
