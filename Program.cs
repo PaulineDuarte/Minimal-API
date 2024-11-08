@@ -6,6 +6,7 @@ using MinimalAPI.Dominio.Entidades;
 using Minimal_API.Dominio.ModelViews;
 using MinimalAPI.DTOs;
 using MinimalAPI.Infraestrutura.Db;
+using MinimalAPI.Dominio.Enuns;
 
 #region Builder
 var builder = WebApplication.CreateBuilder(args);
@@ -46,11 +47,27 @@ app.MapPost("/administradores/login",([FromBody] LoginDTO loginDTO, IAdministrad
 }).WithTags("Administradores");
 
 
+
 app.MapGet("/administradores",([FromQuery] int pagina, IAdministradorServico administradorServico)=> 
-{
-        return Results.Ok(administradorServico.Todos(pagina));
+{       
+        var adms = new List<AdministradorModelView>();
+
+        var administradores = administradorServico.Todos(pagina);
+
+        foreach(var adm in administradores)
+        {
+            adms.Add(new AdministradorModelView {
+                Id = adm.Id,
+                Email = adm.Email,
+                Perfil = adm.Perfil
+            });
+        }
+
+        return Results.Ok(adms);
         
 }).WithTags("Administradores");
+
+
 
 
 app.MapGet("/administrador/{id}",([FromRoute] int Id, IAdministradorServico administradorServico)=> 
@@ -59,7 +76,11 @@ app.MapGet("/administrador/{id}",([FromRoute] int Id, IAdministradorServico admi
             if (administrador == null) 
                 return Results.NotFound();
             
-            return Results.Ok(administrador); 
+            return Results.Ok(new AdministradorModelView {
+                Id = administrador.Id,
+                Email = administrador.Email,
+                Perfil = administrador.Perfil
+            }); 
 }).WithTags("Administradores");
 
 
@@ -93,7 +114,11 @@ app.MapPost("/administradores",([FromBody] AdministradorDTO administradorDTO, IA
             Perfil = administradorDTO.Perfil.ToString()
         };
         administradorServico.Incluir(administrador);
-        return Results.Created($"/administrador/",administrador); 
+        return Results.Created($"/administrador/{administrador.Id}",new AdministradorModelView {
+                Id = administrador.Id,
+                Email = administrador.Email,
+                Perfil = administrador.Perfil
+            }); 
     	
 }).WithTags("Administradores");
 #endregion
