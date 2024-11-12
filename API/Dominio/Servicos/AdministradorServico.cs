@@ -45,4 +45,6 @@ public class AdministradorServico : IAdministradorServico
 
        return query.ToList() ; 
     }
+
+
 }
